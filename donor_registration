@@ -1,0 +1,429 @@
+<!DOCTYPE html> 
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Donation Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #e53935;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #c62828;
+    }
+  </style>
+
+
+  <!-- Firebase SDKs (Step 2) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
+</head>
+
+
+<body>
+<div style="text-align: right; padding: 10px;">
+  Logged in as: <span id="userEmail">Loading...</span>
+  <button onclick="logoutUser()">Logout</button>
+</div>
+
+  <div class="container">
+   <h2>Donor Registration</h2>
+    <form id="donorForm">
+      <label for="name">Full Name:</label>
+    <input type="text" id="name" placeholder="Enter your full name" required>
+
+<label for="email">Email Address:</label>
+<input type="email" id="email" placeholder="Enter your email" required>
+
+<label for="password">Password:</label>
+<div style="position: relative;">
+  <input type="password" id="password" placeholder="Enter a strong password" required>
+  <span onclick="togglePassword('password', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
+</div>
+<small id="passwordStrength" style="color:gray;"></small>
+
+<label for="confirmPassword">Confirm Password:</label>
+<div style="position: relative;">
+  <input type="password" id="confirmPassword" placeholder="Re-enter your password" required>
+  <span onclick="togglePassword('confirmPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
+</div>
+
+
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" placeholder="Enter your 10-digit number" required>
+
+   
+ <div id="recaptcha-container"></div>
+     <button type="button" onclick="sendOTP()" id="otpButton">Send OTP</button>
+
+    <label for="otp">Enter OTP:</label>
+    <input type="text" id="otp" placeholder="Enter the OTP received">
+   <button type="button" onclick="verifyOTP(event)" id="verifyButton">Verify OTP</button>
+
+    <label for="gender">Gender:</label>
+    <select id="gender">
+      <option value="">Select</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob">
+
+    <label for="bloodGroup">Blood Group:</label>
+    <select id="bloodGroup">
+      <option value="">Select</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
+
+    <label for="district">District:</label>
+    <select id="district" onchange="populateAreas()">
+      <option value="">Select District</option>
+    </select>
+
+    <label for="area">Area:</label>
+    <select id="area">
+      <option value="">Select Area</option>
+    </select>
+
+    <label for="lastDonation">Last Donation Date:</label>
+    <input type="date" id="lastDonation">
+
+<button onclick="registerDonor(event)">Register</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, setDoc, getDoc, doc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+   import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB76hYryXBzyKQ5_hbsZLhx-l6Y46fbpAw",
+      authDomain: "blood-donors-connect.firebaseapp.com",
+      projectId: "blood-donors-connect",
+      storageBucket: "blood-donors-connect.firebasestorage.app",
+      messagingSenderId: "813438848251",
+      appId: "1:813438848251:web:617a43ac27531922ddb45e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+const isLocal = location.hostname === "localhost";
+
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    const docRef = doc(db, "donors", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      if (!isLocal) window.location.href = "donor-dashboard.html"; // allow staying on the page for localhost
+    } else {
+      document.getElementById("userEmail").textContent = user.email || "User";
+    }
+  } else {
+    if (!isLocal) window.location.href = "donor-login.html"; // don't redirect locally if unauthenticated
+  }
+});
+
+    document.addEventListener("DOMContentLoaded", function () {
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    'size': 'normal',
+    'callback': (response) => {
+      console.log('Recaptcha solved');
+    },
+    'expired-callback': () => {
+      console.log('Recaptcha expired');
+    }
+  });
+
+  // Optionally render manually if needed:
+  recaptchaVerifier.render().then(widgetId => {
+    console.log('Recaptcha rendered with ID:', widgetId);
+  });
+});
+
+
+    let confirmationResult;
+  window.logoutUser = async function () {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+      window.location.href = "home-donor.html";
+    } catch (error) {
+      alert("Logout failed: " + error.message);
+    }
+  };
+
+    window.sendOTP = async function () {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone.match(/^[6-9]\d{9}$/)) {
+        alert("Please enter a valid 10-digit Indian phone number.");
+        return;
+      }
+
+      try {
+        confirmationResult = await signInWithPhoneNumber(auth, "+91" + phone, window.recaptchaVerifier);
+        alert("OTP sent successfully!");
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        alert("Failed to send OTP. Try again.");
+      }
+    };
+
+    window.verifyOTP = async function (event) {
+      event.preventDefault();
+      const otp = document.getElementById("otp").value.trim();
+      if (!otp || otp.length !== 6) {
+        alert("Please enter the 6-digit OTP.");
+        return;
+      }
+
+      try {
+        await confirmationResult.confirm(otp);
+        alert("Phone number verified successfully! Please complete the registration form and submit.");
+
+      } catch (error) {
+        console.error("Error verifying OTP:", error);
+        alert("Invalid OTP. Try again.");
+      }
+    };
+
+    const districtsWithAreas = {
+      "Chennai": ["T. Nagar", "Velachery", "Anna Nagar", "Adyar", "Kodambakkam", "Tambaram"],
+      "Coimbatore": ["RS Puram", "Gandhipuram", "Peelamedu", "Singanallur", "Saibaba Colony"],
+      "Madurai": ["Anna Nagar", "KK Nagar", "Thiruparankundram", "Tallakulam", "Simmakkal"],
+      "Tiruchirappalli": ["Thillai Nagar", "Srirangam", "Cantonment", "Woraiyur", "K.K. Nagar"],
+      "Salem": ["Fairlands", "Gugai", "Hasthampatti", "Ammapet", "Steel Plant Area"],
+      "Tirunelveli": ["Palayamkottai", "Melapalayam", "Tirunelveli Town", "Vannarpet", "Manonmaniam"],
+      "Erode": ["Perundurai", "Gobichettipalayam", "Bhavani", "Chithode", "Modakurichi"],
+      "Vellore": ["Katpadi", "Vaniyambadi", "Gudiyatham", "Arakkonam", "Ranipet"],
+      "Thanjavur": ["Kumbakonam", "Papanasam", "Pattukkottai", "Orathanadu", "Thiruvaiyaru"],
+      "Theni": ["Periyakulam", "Cumbum", "Bodinayakanur", "Andipatti", "Uthamapalayam"],
+      "Dharmapuri": ["Harur", "Pappireddipatti", "Palacode", "Pennagaram", "Karimangalam"],
+      "Dindigul": ["Palani", "Oddanchatram", "Nilakottai", "Vedasandur", "Batlagundu"],
+      "Kanchipuram": ["Sriperumbudur", "Chengalpattu", "Uthiramerur", "Acharapakkam", "Madurantakam"],
+      "Kanniyakumari": ["Nagercoil", "Kuzhithurai", "Padmanabhapuram", "Colachel", "Thuckalay"],
+      "Karur": ["Kulithalai", "Krishnarayapuram", "Aravakurichi", "Manmangalam", "Thanthoni"],
+      "Krishnagiri": ["Hosur", "Uthangarai", "Pochampalli", "Denkanikottai", "Bargur"],
+      "Namakkal": ["Rasipuram", "Tiruchengode", "Paramathi Velur", "Sendamangalam", "Kolli Hills"],
+      "Nilgiris": ["Ooty", "Coonoor", "Gudalur", "Kotagiri", "Kundah"],
+      "Perambalur": ["Veppanthattai", "Kunnam", "Perambalur Town", "Arumbavur"],
+      "Pudukkottai": ["Aranthangi", "Alangudi", "Iluppur", "Viralimalai", "Pudukkottai Town"],
+      "Ramanathapuram": ["Paramakudi", "Rameswaram", "Mudukulathur", "Kamuthi", "Ramanathapuram Town"],
+      "Sivaganga": ["Karaikudi", "Devakottai", "Sivaganga Town", "Manamadurai", "Ilayangudi"],
+      "Thiruvallur": ["Avadi", "Poonamallee", "Tiruvallur", "Pattabiram", "Gummidipoondi"],
+      "Thiruvarur": ["Mannargudi", "Thiruvarur Town", "Kodavasal", "Nannilam", "Needamangalam"],
+      "Thoothukudi": ["Thoothukudi Town", "Srivaikuntam", "Tiruchendur", "Eral", "Kovilpatti"],
+      "Tiruppur": ["Avinashi", "Udumalaipettai", "Palladam", "Dharapuram", "Tiruppur Town"],
+      "Tiruvannamalai": ["Arni", "Cheyyar", "Polur", "Tiruvannamalai Town", "Kalasapakkam"],
+      "Vellore (New)": ["Arcot", "Gudiyattam", "Wallajah", "Ambur", "Vaniyambadi"],
+      "Viluppuram": ["Kallakurichi", "Tindivanam", "Gingee", "Villupuram Town", "Ulundurpettai"],
+      "Virudhunagar": ["Rajapalayam", "Sattur", "Sivakasi", "Virudhunagar Town", "Aruppukkottai"],
+      "Ariyalur": ["Ariyalur Town", "Jayankondam", "Sendurai", "Andimadam", "Udayarpalayam"],
+      "Chengalpattu": ["Tambaram", "Chromepet", "Pallavaram", "Guduvanchery", "Kelambakkam"],
+      "Kallakurichi": ["Kallakurichi Town", "Chinnasalem", "Sankarapuram", "Ulundurpet", "Tirukkoyilur"],
+      "Mayiladuthurai": ["Mayiladuthurai Town", "Sirkazhi", "Kuthalam", "Tharangambadi", "Seergazhi"],
+      "Ranipet": ["Ranipet Town", "Arcot", "Walajapet", "Sholinghur", "Melvisharam"],
+      "Tenkasi": ["Tenkasi Town", "Courtallam", "Sankarankovil", "Alangulam", "Kadayanallur"],
+      "Tirupathur": ["Tirupathur Town", "Vaniyambadi", "Ambur", "Natrampalli", "Jolarpettai"]
+    };
+
+    window.populateAreas = function () {
+      const districtSelect = document.getElementById('district');
+      const areaSelect = document.getElementById('area');
+      const selectedDistrict = districtSelect.value;
+
+      areaSelect.innerHTML = '<option value="">Select Area</option>';
+
+      if (districtsWithAreas[selectedDistrict]) {
+        districtsWithAreas[selectedDistrict].forEach(area => {
+          const option = document.createElement('option');
+          option.value = area;
+          option.text = area;
+          areaSelect.appendChild(option);
+        });
+      }
+    };
+
+    const districtSelect = document.getElementById('district');
+    for (const district in districtsWithAreas) {
+      const option = document.createElement('option');
+      option.value = district;
+      option.text = district;
+      districtSelect.appendChild(option);
+    }
+
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+window.registerDonor = async function (event) {
+  event.preventDefault();
+
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+  if (!email || !password || !confirmPassword) {
+    alert("Please fill in all email/password fields.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    return;
+  }
+
+  const dobInput = document.getElementById('dob').value;
+  const lastDonationInput = document.getElementById('lastDonation').value;
+
+  // Age calculation
+  let age = null;
+  if (dobInput) {
+    const dobDate = new Date(dobInput);
+    if (!isNaN(dobDate.getTime())) {
+      const today = new Date();
+      age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+    }
+  }
+
+  let lastDonation = "Invalid Date";
+  if (lastDonationInput) {
+    const donationDate = new Date(lastDonationInput);
+    if (!isNaN(donationDate.getTime())) {
+      lastDonation = donationDate.toISOString().split('T')[0];
+    }
+  }
+
+  try {
+    // ✅ Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // ✅ Store donor info in Firestore
+    const donor = {
+      name: name,
+      phone: phone,
+      email: email,
+      gender: document.getElementById('gender').value,
+      dob: dobInput,
+      age: age,
+      bloodGroup: document.getElementById('bloodGroup').value,
+      district: document.getElementById('district').value,
+      area: document.getElementById('area').value,
+      lastDonation: lastDonation
+    };
+
+    await setDoc(doc(db, "donors", user.uid), donor);
+
+    alert("Registration successful!");
+    document.getElementById('donorForm').reset();
+    window.location.href = "donor-dashboard.html";
+  } catch (error) {
+  console.error("Registration error:", error);
+  if (error.code === 'auth/email-already-in-use') {
+    alert("This email is already registered. Please log in or use a different email.");
+  } else if (error.code === 'auth/invalid-email') {
+    alert("Please enter a valid email address.");
+  } else if (error.code === 'auth/weak-password') {
+    alert("Password should be at least 6 characters.");
+  } else {
+    alert("Registration failed: " + error.message);
+  }
+}
+
+};
+// ✅ Password strength checker
+document.getElementById("password").addEventListener("input", function () {
+  const strengthText = document.getElementById("passwordStrength");
+  const password = this.value;
+
+  const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  if (strong.test(password)) {
+    strengthText.textContent = "Strong password ✔️";
+    strengthText.style.color = "green";
+  } else {
+    strengthText.textContent = "Password must be 8+ chars with uppercase, lowercase, number, special character.";
+    strengthText.style.color = "red";
+  }
+});
+
+// 👁️ Toggle password visibility
+window.togglePassword = function (fieldId, iconElement) {
+  const input = document.getElementById(fieldId);
+  if (input.type === "password") {
+    input.type = "text";
+    iconElement.textContent = "🚫"; // Show text, icon changes
+  } else {
+    input.type = "password";
+    iconElement.textContent = "👁️"; // Hide text, icon resets
+  }
+};
+
+
+
+</script>
+<footer style="text-align: center; padding: 20px; color: #555; font-size: 14px;">
+  &copy; 2025 Blood Donors Connect | Powered by SFRBC Students Wing
+</footer>
+</body>
+</html>
+
