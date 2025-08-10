@@ -174,7 +174,11 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById("userEmail").textContent = user.email || "User";
     }
   } else {
-    //if (!isLocal) window.location.href = "donor-login.html"; // don't redirect locally if unauthenticated
+     // Redirect only if we are NOT on donor.html
+    const currentPage = window.location.pathname.split("/").pop();
+    if (currentPage !== "donor.html" && !isLocal) {
+        window.location.href = "donor-login.html";
+  
   }
 });
 
