@@ -174,7 +174,7 @@ auth.onAuthStateChanged(async (user) => {
       document.getElementById("userEmail").textContent = user.email || "User";
     }
   } else {
-    if (!isLocal) window.location.href = "donor-login.html"; // don't redirect locally if unauthenticated
+    //if (!isLocal) window.location.href = "donor-login.html"; // don't redirect locally if unauthenticated
   }
 });
 
