@@ -169,8 +169,11 @@ auth.onAuthStateChanged(async (user) => {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      if (!isLocal) window.location.href = "donor-dashboard.html"; // allow staying on the page for localhost
-    } else {
+    if (currentPage !== "donor.html" && !isLocal) {
+        window.location.href = "donor-dashboard.html";
+    }
+}
+else {
       document.getElementById("userEmail").textContent = user.email || "User";
     }
   } else {
@@ -360,7 +363,7 @@ window.registerDonor = async function (event) {
     // ✅ Create user in Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
+    
     // ✅ Store donor info in Firestore
     const donor = {
       name: name,
