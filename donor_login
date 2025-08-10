@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donor Login - Blood Donation Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .hero-banner {
+      background-color: #c0392b;
+      color: white;
+      text-align: center;
+      padding: 15px 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .hero-banner h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .hero-banner p {
+      margin: 5px 0 0;
+      font-size: 16px;
+      font-style: italic;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #c0392b;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #a93226;
+    }
+
+    .register-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .register-section p {
+      margin-bottom: 10px;
+    }
+
+    .register-section a {
+      text-decoration: none;
+      color: #c0392b;
+    }
+
+    .register-section a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hero-banner">
+    <h1>Driven by Purpose, United by Blood</h1>
+    <p>— A Compassionate Mission to Heal Humanity by SFRBC Students Wing, Tamil Nadu.</p>
+  </div>
+
+  <div class="container">
+    <h2>Donor Login</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <button onclick="forgotPassword()">Forgot Password?</button>
+    <p style="color: red; margin-top: 10px;">New donors should register first and then login.</p>
+
+    <div class="register-section">
+      <p>Don't have an account?</p>
+      <a href="donor.html">Register as a New Donor</a>
+    </div>
+  </div>
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB76hYryXBzyKQ5_hbsZLhx-l6Y46fbpAw",
+      authDomain: "blood-donors-connect.firebaseapp.com",
+      projectId: "blood-donors-connect",
+      storageBucket: "blood-donors-connect.appspot.com",
+      messagingSenderId: "813438848251",
+      appId: "1:813438848251:web:617a43ac27531922ddb45e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+
+          // Check if user is registered in Firestore
+          db.collection("donors").doc(user.uid).get()
+            .then((doc) => {
+              if (doc.exists) {
+                alert("Login successful!");
+                window.location.href = "donor-dashboard.html";
+              } else {
+                alert("You have logged in, but you have not registered as a donor yet. Please register first.");
+                auth.signOut(); // Sign out the user if no donor record exists
+              }
+            })
+            .catch((error) => {
+              alert("Error checking registration: " + error.message);
+            });
+
+        })
+        .catch((error) => {
+  if (error.code === 'auth/user-not-found') {
+    alert("No account found with this email.");
+  } else if (error.code === 'auth/wrong-password') {
+    alert("Incorrect password. Please try again.");
+  } else if (error.code === 'auth/invalid-email') {
+    alert("Invalid email format.");
+  } else {
+    alert("Login failed: " + error.message);
+  }
+});
+
+    });
+
+    function forgotPassword() {
+      const email = prompt("Please enter your registered email:");
+      if (email) {
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            alert("Password reset email sent.");
+          })
+          .catch((error) => {
+            alert("Error: " + error.message);
+          });
+      }
+    }
+  </script>
+
+<footer style="text-align: center; padding: 20px; color: #555; font-size: 14px;">
+  &copy; 2025 Blood Donors Connect | Powered by SFRBC Students Wing
+</footer>
+
+</body>
+
+</html>
