@@ -1,0 +1,313 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blood Donor Search</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color:#e80909;
+    }
+
+    form {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: #ffeaea;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #d63333;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #a72828;
+    }
+
+    #results {
+      max-width: 700px;
+      margin: 30px auto;
+    }
+
+    .donor {
+      background: #ffecec;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .donor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .eligible {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    .ineligible {
+      background: #e2e3e5;
+      border-left: 4px solid #6c757d;
+      opacity: 0.6;
+    }
+
+    .last-date {
+      padding: 4px 8px;
+      border-radius: 5px;
+      display: inline-block;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .last-date.green {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    .last-date.gray {
+      background: #e2e3e5;
+      border-left: 4px solid #6c757d;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align: center; color: red;">Search for Blood Donors</h2>
+<div id="currentDateTime" style="text-align:center; font-weight:bold; margin-bottom: 20px;"></div>
+
+
+  <label for="searchGroup">Select Blood Group:</label>
+  <select id="searchGroup">
+    <option value="">-- Select --</option>
+    <option>A+</option>
+    <option>A-</option>
+    <option>B+</option>
+    <option>B-</option>
+    <option>O+</option>
+    <option>O-</option>
+    <option>AB+</option>
+    <option>AB-</option>
+  </select>
+
+  <label for="searchDistrict">Select District:</label>
+  <select id="searchDistrict">
+    <option value="">-- Select District --</option>
+  </select>
+
+  <label for="searchArea">Select Area (Optional):</label>
+  <select id="searchArea">
+    <option value="">-- Select Area --</option>
+  </select>
+
+  <button id="searchBtn">Search</button>
+  <div id="loader" style="display:none; text-align:center;">
+    <p>Searching for donors...</p>
+  </div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB76hYryXBzyKQ5_hbsZLhx-l6Y46fbpAw",
+      authDomain: "blood-donors-connect.firebaseapp.com",
+      projectId: "blood-donors-connect",
+      storageBucket: "blood-donors-connect.appspot.com",
+      messagingSenderId: "813438848251",
+      appId: "1:813438848251:web:617a43ac27531922ddb45e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const districts = {
+      "Chennai": ["T. Nagar", "Velachery", "Anna Nagar", "Adyar", "Kodambakkam", "Tambaram"],
+      "Coimbatore": ["RS Puram", "Gandhipuram", "Peelamedu", "Singanallur", "Saibaba Colony"],
+      "Madurai": ["Anna Nagar", "KK Nagar", "Thiruparankundram", "Tallakulam", "Simmakkal"],
+      "Tiruchirappalli": ["Thillai Nagar", "Srirangam", "Cantonment", "Woraiyur", "K.K. Nagar"],
+      "Salem": ["Fairlands", "Gugai", "Hasthampatti", "Ammapet", "Steel Plant Area"],
+      "Tirunelveli": ["Palayamkottai", "Melapalayam", "Tirunelveli Town", "Vannarpet", "Manonmaniam"],
+      "Erode": ["Perundurai", "Gobichettipalayam", "Bhavani", "Chithode", "Modakurichi"],
+      "Vellore": ["Katpadi", "Vaniyambadi", "Gudiyatham", "Arakkonam", "Ranipet"],
+      "Thanjavur": ["Kumbakonam", "Papanasam", "Pattukkottai", "Orathanadu", "Thiruvaiyaru"],
+      "Theni": ["Periyakulam", "Cumbum", "Bodinayakanur", "Andipatti", "Uthamapalayam"],
+      "Dharmapuri": ["Harur", "Pappireddipatti", "Palacode", "Pennagaram", "Karimangalam"],
+      "Dindigul": ["Palani", "Oddanchatram", "Nilakottai", "Vedasandur", "Batlagundu"],
+      "Kanchipuram": ["Sriperumbudur", "Chengalpattu", "Uthiramerur", "Acharapakkam", "Madurantakam"],
+      "Kanniyakumari": ["Nagercoil", "Kuzhithurai", "Padmanabhapuram", "Colachel", "Thuckalay"],
+      "Karur": ["Kulithalai", "Krishnarayapuram", "Aravakurichi", "Manmangalam", "Thanthoni"],
+      "Krishnagiri": ["Hosur", "Uthangarai", "Pochampalli", "Denkanikottai", "Bargur"],
+      "Namakkal": ["Rasipuram", "Tiruchengode", "Paramathi Velur", "Sendamangalam", "Kolli Hills"],
+      "Nilgiris": ["Ooty", "Coonoor", "Gudalur", "Kotagiri", "Kundah"],
+      "Perambalur": ["Veppanthattai", "Kunnam", "Perambalur Town", "Arumbavur"],
+      "Pudukkottai": ["Aranthangi", "Alangudi", "Iluppur", "Viralimalai", "Pudukkottai Town"],
+      "Ramanathapuram": ["Paramakudi", "Rameswaram", "Mudukulathur", "Kamuthi", "Ramanathapuram Town"],
+      "Sivaganga": ["Karaikudi", "Devakottai", "Sivaganga Town", "Manamadurai", "Ilayangudi"],
+      "Thiruvallur": ["Avadi", "Poonamallee", "Tiruvallur", "Pattabiram", "Gummidipoondi"],
+      "Thiruvarur": ["Mannargudi", "Thiruvarur Town", "Kodavasal", "Nannilam", "Needamangalam"],
+      "Thoothukudi": ["Thoothukudi Town", "Srivaikuntam", "Tiruchendur", "Eral", "Kovilpatti"],
+      "Tiruppur": ["Avinashi", "Udumalaipettai", "Palladam", "Dharapuram", "Tiruppur Town"],
+      "Tiruvannamalai": ["Arni", "Cheyyar", "Polur", "Tiruvannamalai Town", "Kalasapakkam"],
+      "Vellore (New)": ["Arcot", "Gudiyattam", "Wallajah", "Ambur", "Vaniyambadi"],
+      "Viluppuram": ["Kallakurichi", "Tindivanam", "Gingee", "Villupuram Town", "Ulundurpettai"],
+      "Virudhunagar": ["Rajapalayam", "Sattur", "Sivakasi", "Virudhunagar Town", "Aruppukkottai"],
+      "Ariyalur": ["Ariyalur Town", "Jayankondam", "Sendurai", "Andimadam", "Udayarpalayam"],
+      "Chengalpattu": ["Tambaram", "Chromepet", "Pallavaram", "Guduvanchery", "Kelambakkam"],
+      "Kallakurichi": ["Kallakurichi Town", "Chinnasalem", "Sankarapuram", "Ulundurpet", "Tirukkoyilur"],
+      "Mayiladuthurai": ["Mayiladuthurai Town", "Sirkazhi", "Kuthalam", "Tharangambadi", "Seergazhi"],
+      "Ranipet": ["Ranipet Town", "Arcot", "Walajapet", "Sholinghur", "Melvisharam"],
+      "Tenkasi": ["Tenkasi Town", "Courtallam", "Sankarankovil", "Alangulam", "Kadayanallur"],
+      "Tirupathur": ["Tirupathur Town", "Vaniyambadi", "Ambur", "Natrampalli", "Jolarpettai"]
+    };
+
+    const districtSelect = document.getElementById('searchDistrict');
+    const areaSelect = document.getElementById('searchArea');
+
+    for (const dist in districts) {
+      const option = document.createElement('option');
+      option.value = dist;
+      option.textContent = dist;
+      districtSelect.appendChild(option);
+    }
+
+    districtSelect.addEventListener('change', () => {
+      const selected = districtSelect.value;
+      areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
+      if (districts[selected]) {
+        districts[selected].forEach(area => {
+          const opt = document.createElement('option');
+          opt.value = area;
+          opt.textContent = area;
+          areaSelect.appendChild(opt);
+        });
+      }
+    });
+
+   async function searchDonors() {
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('searchBtn').disabled = true;
+      const group = document.getElementById('searchGroup').value;
+      const district = document.getElementById('searchDistrict').value;
+      const area = document.getElementById('searchArea').value;
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (!group) {
+        resultsDiv.innerHTML = '<div class="alert">⚠️ Please select a blood group to search</div>';
+        return;
+      }
+
+      const snapshot = await getDocs(collection(db, "donors"));
+      const today = new Date();
+
+      snapshot.forEach(doc => {
+  const donor = doc.data();
+  let donorDate = donor.lastDonation ? new Date(donor.lastDonation) : null;
+
+  const dateLabel = donorDate
+    ? `${String(donorDate.getDate()).padStart(2, '0')}/${String(donorDate.getMonth() + 1).padStart(2, '0')}/${donorDate.getFullYear()}`
+    : "Never Donated";
+
+  let diffDays = donorDate ? (today - donorDate) / (1000 * 60 * 60 * 24) : Infinity;
+
+  if (donor.bloodGroup === group) {
+    if ((district && donor.district !== district) || (area && area !== "" && donor.area !== area)) return;
+
+    const eligible = diffDays >= 60 || !donorDate;
+    const dateClass = eligible ? "green" : "gray";
+    const status = eligible ? '✅ Ready to donate' : `⏳ Eligible in ${Math.ceil(60 - diffDays)} days`;
+
+    const donorHTML = `
+      <div class="donor ${eligible ? 'eligible' : 'ineligible'}">
+        <div style="display:flex; justify-content:space-between">
+          <strong>${donor.name}</strong>
+          <span>${status}</span>
+        </div>
+        <div class="donor-grid">
+          <div>Age: ${donor.age}</div>
+          <div>Blood Group: ${donor.bloodGroup}</div>
+          <div>Location: ${donor.district}, ${donor.area}</div>
+          <div class="last-date ${dateClass}">Last Donated: ${dateLabel}</div>
+          <div>Phone: ${donor.phone}</div>
+        </div>
+      </div>
+    `;
+
+    resultsDiv.innerHTML += donorHTML;
+  }
+});
+
+      if (resultsDiv.innerHTML === '') {
+        resultsDiv.innerHTML = '<div class="alert">No matching donors found. Try broadening your search.</div>';
+      }
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('searchBtn').disabled = false;
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', searchDonors);
+function updateDateTime() {
+  const now = new Date();
+
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayName = days[now.getDay()];
+
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+
+  let hours = now.getHours();
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+
+  const time = `${hours}:${minutes}:${seconds} ${ampm}`;
+  const formattedDateTime = `${dayName}, ${day}/${month}/${year} – ${time}`;
+
+  document.getElementById("currentDateTime").textContent = "Current Date & Time: " + formattedDateTime;
+}
+
+setInterval(updateDateTime, 1000); // updates every second
+updateDateTime(); // initial call
+  </script>
+<footer style="text-align: center; padding: 20px; color: #555; font-size: 14px;">
+  &copy; 2025 Blood Donors Connect | Powered by SFRBC Students Wing
+</footer>
+
+</body>
+</html>
