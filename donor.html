@@ -178,7 +178,7 @@ auth.onAuthStateChanged(async (user) => {
     const currentPage = window.location.pathname.split("/").pop();
     if (currentPage !== "donor.html" && !isLocal) {
         window.location.href = "donor-login.html";
-  
+    }
   }
 });
 
