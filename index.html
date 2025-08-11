@@ -39,21 +39,23 @@
       margin: 20px 0;
     }
 
+    /* MARQUEE */
     .marquee-container {
-      background: #fce8e8;
-      color: #9c0505;
+      background: #fff0f0;
+      color: #b30000;
       overflow: hidden;
       white-space: nowrap;
       padding: 10px 0;
-      position: relative;
+      border-top: 1px solid #f5c2c2;
+      border-bottom: 1px solid #f5c2c2;
     }
 
     .marquee {
       display: inline-block;
-      white-space: nowrap;
       will-change: transform;
-      animation: marquee 20s linear infinite;
+      animation: marquee 12s linear infinite;
       padding-left: 100%;
+      font-weight: 600;
     }
 
     .marquee:hover {
@@ -61,13 +63,10 @@
     }
 
     @keyframes marquee {
-      0% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(-100%);
-      }
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
     }
+
 
     nav {
       display: flex;
