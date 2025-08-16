@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blood Connect — Save Lives Today</title>
+  <style>
+    :root {
+      --primary: #e60000;
+      --secondary: #fff5f5;
+      --accent: #ffd6cc;
+      --text: #333;
+      --motivational: #b71c1c;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main {
+      flex: 1;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-wrap {
+      width: 90px;
+      height: 90px;
+      margin: 28px 0 12px 0;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(230,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-wrap img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      font-weight: 900;
+      font-size: 2em;
+      color: var(--primary);
+      letter-spacing: 0.6px;
+    }
+    .subtitle {
+      font-size: 1.1em;
+      font-weight: 500;
+      color: #d63333;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .motivation {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 1.1em;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 26px;
+      text-align: center;
+      box-shadow: 0 4px 18px rgba(229,0,0,0.4);
+      line-height: 1.35;
+    }
+    .features {
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .feature-box {
+      background: white;
+      border-radius: 14px;
+      padding: 14px 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      text-align: center;
+      font-weight: 600;
+      color: var(--motivational);
+      font-size: 0.95em;
+      line-height: 1.2;
+      user-select: none;
+      transition: transform 0.2s ease;
+      cursor: default;
+    }
+    .feature-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(229, 0, 0, 0.25);
+    }
+    .feature-icon {
+      font-size: 1.6em;
+      margin-bottom: 6px;
+      color: var(--primary);
+    }
+    .nav-btns {
+      width: 100%;
+      max-width: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 0 auto 22px auto;
+    }
+    .nav-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      font-size: 1.13em;
+      font-weight: 700;
+      padding: 16px 0;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(230,0,0,0.08);
+      transition: background 0.2s;
+    }
+    .nav-btn.secondary {
+      background: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      font-weight: 600;
+    }
+    .nav-btn:active, .nav-btn:hover {
+      background: #b30000;
+      color: #fff;
+    }
+    .nav-btn.secondary:active {
+      background: #fff;
+      color: #b30000;
+      border-color: #b30000;
+    }
+    .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.95em;
+      margin: 10px 0 18px 0;
+      letter-spacing: 0.06em;
+    }
+    .marquee-box {
+      width: 100vw;
+      background: #fff0f0;
+      color: #b30000;
+      font-weight: 600;
+      padding: 10px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid #f5c2c2;
+      border-bottom: 1px solid #f5c2c2;
+      margin: 0 -16px 20px -16px;
+    }
+    .marquee-txt {
+      animation: marquee 10s linear infinite;
+      display: inline-block;
+      padding-left: 100%;
+    }
+    .marquee-txt:hover {
+      animation-play-state: paused;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0%); }
+      to { transform: translateX(-100%); }
+    }
+    @media (min-width: 650px) {
+      .main {
+        max-width: 400px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(50,50,50,0.08);
+      }
+      .marquee-box { width: 400px; left: 50%; transform: translateX(-50%) }
+    }
+  </style>
+  <script>
+    function goTo(page) {
+      window.location.href = page;
+    }
+  </script>
+</head>
+<body>
+  <div class="main">
+    <div class="logo-wrap">
+      <img src="BLCO-logo.png.jpg" alt="Blood Connect Logo" />
+    </div>
+    <h1>Blood Connect</h1>
+    <div class="subtitle">To Save Lives, Symbol of Dedication.<br>
+      <span style="font-size:0.97em">— SFRBC Students Wing, Tamilnadu.</span>
+    </div>
+
+    <div class="motivation">
+      “The gift of blood is the gift of life — Join us to make a difference today!”
+    </div>
+
+    <div class="features">
+      <div class="feature-box">
+        <div class="feature-icon">🩸</div>
+        Safe & Easy Donation
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">👥</div>
+        Connect with Local Donors
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">⏳</div>
+        Quick Emergency Help
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">❤️</div>
+        Save Precious Lives
+      </div>
+    </div>
+
+    <div class="marquee-box">
+      <span class="marquee-txt">
+        A INITIATIVE BY SFRBC STUDENTS WING TAMILNADU | New Donors Are Requested To Register First And Then Login
+      </span>
+    </div>
+
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="goTo('search.html')">🔍 Find Donor / Emergency Request</button>
+      <button class="nav-btn secondary" onclick="goTo('donor.html')">🩸 Register as Donor</button>
+      <button class="nav-btn secondary" onclick="goTo('donor-login.html')">🔑 Login</button>
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 Blood Donors Connect | Powered by SFRBC Students Wing
+  </div>
+</body>
+</html>
