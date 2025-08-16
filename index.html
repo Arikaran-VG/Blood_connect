@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Blood Donation Portal</title>
+  <script>
+  // Redirect only once using localStorage
+  if (window.innerWidth < 700 && !localStorage.getItem("mobileRedirected")) {
+    localStorage.setItem("mobileRedirected", "true");
+    window.location.href = "mobile-home.html";
+  }
+</script>
+
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
