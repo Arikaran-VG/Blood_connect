@@ -6,7 +6,7 @@
   <title>Blood Donation Portal</title>
   <script>
   // Redirect only once using localStorage
-  if (window.innerWidth < 700 && !localStorage.getItem("mobileRedirected")) {
+  if (window.innerWidth < 500 && !localStorage.getItem("mobileRedirected")) {
     localStorage.setItem("mobileRedirected", "true");
     window.location.href = "mobile-home.html";
   }
