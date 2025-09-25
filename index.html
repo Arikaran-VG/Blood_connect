@@ -3,273 +3,238 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Blood Donation Portal</title>
-  <script>
-  // Redirect only once using localStorage
-  if (window.innerWidth < 500 && !localStorage.getItem("mobileRedirected")) {
-    localStorage.setItem("mobileRedirected", "true");
-    window.location.href = "mobile-home.html";
-  }
-</script>
-
+  <title>Blood Connect — Save Lives Today</title>
   <style>
+    :root {
+      --primary: #e60000;
+      --secondary: #fff5f5;
+      --accent: #ffd6cc;
+      --text: #333;
+      --motivational: #b71c1c;
+    }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #fff5f5;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-
-    header {
-      background-color: #e60000;
+    .main {
+      flex: 1;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-wrap {
+      width: 90px;
+      height: 90px;
+      margin: 28px 0 12px 0;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(230,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-wrap img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      font-weight: 900;
+      font-size: 2em;
+      color: var(--primary);
+      letter-spacing: 0.6px;
+    }
+    .subtitle {
+      font-size: 1.1em;
+      font-weight: 500;
+      color: #d63333;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .motivation {
+      background: var(--primary);
       color: white;
-      padding: 30px;
+      font-weight: 700;
+      font-size: 1.1em;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 26px;
       text-align: center;
-      animation: fadeIn 2s ease-in-out;
+      box-shadow: 0 4px 18px rgba(229,0,0,0.4);
+      line-height: 1.35;
     }
-
-    .hero-text {
-      font-size: 2.5em;
-      font-weight: bold;
+    .features {
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
-
-    .sub-hero {
-      font-size: 1.75em;
-      color: yellow;
-      margin-top: 10px;
-      animation: slideIn 2s ease-in-out;
-    }
-
-    .datetime {
+    .feature-box {
+      background: white;
+      border-radius: 14px;
+      padding: 14px 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
       text-align: center;
-      font-size: 1.2em;
-      margin: 20px 0;
+      font-weight: 600;
+      color: var(--motivational);
+      font-size: 0.95em;
+      line-height: 1.2;
+      user-select: none;
+      transition: transform 0.2s ease;
+      cursor: default;
     }
-
-    /* MARQUEE */
-    .marquee-container {
+    .feature-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(229, 0, 0, 0.25);
+    }
+    .feature-icon {
+      font-size: 1.6em;
+      margin-bottom: 6px;
+      color: var(--primary);
+    }
+    .nav-btns {
+      width: 100%;
+      max-width: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 0 auto 22px auto;
+    }
+    .nav-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      font-size: 1.13em;
+      font-weight: 700;
+      padding: 16px 0;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(230,0,0,0.08);
+      transition: background 0.2s;
+    }
+    .nav-btn.secondary {
+      background: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      font-weight: 600;
+    }
+    .nav-btn:active, .nav-btn:hover {
+      background: #b30000;
+      color: #fff;
+    }
+    .nav-btn.secondary:active {
+      background: #fff;
+      color: #b30000;
+      border-color: #b30000;
+    }
+    .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.95em;
+      margin: 10px 0 18px 0;
+      letter-spacing: 0.06em;
+    }
+    .marquee-box {
+      width: 100vw;
       background: #fff0f0;
       color: #b30000;
+      font-weight: 600;
+      padding: 10px 0;
       overflow: hidden;
       white-space: nowrap;
-      padding: 10px 0;
       border-top: 1px solid #f5c2c2;
       border-bottom: 1px solid #f5c2c2;
+      margin: 0 -16px 20px -16px;
     }
-
-    .marquee {
+    .marquee-txt {
+      animation: marquee 10s linear infinite;
       display: inline-block;
-      will-change: transform;
-      animation: marquee 12s linear infinite;
       padding-left: 100%;
-      font-weight: 600;
     }
-
-    .marquee:hover {
+    .marquee-txt:hover {
       animation-play-state: paused;
     }
-
     @keyframes marquee {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-100%); }
+      from { transform: translateX(0%); }
+      to { transform: translateX(-100%); }
     }
-
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 30px 0;
-      flex-wrap: wrap;
-    }
-
-    nav button {
-      padding: 14px 26px;
-      background: linear-gradient(135deg, #e60000, #b00000);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-
-    nav button:hover {
-      background: linear-gradient(135deg, #c40000, #900000);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-
-
-    .total-count {
-      text-align: center;
-      font-size: 1.5em;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .blood-boxes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 20px;
-      padding: 0 30px 40px;
-    }
-
-    .blood-box {
-      background-color: #ffcccc;
-      border-radius: 12px;
-      text-align: center;
-      padding: 20px 10px;
-      font-size: 1.2em;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transform: translateY(20px);
-      opacity: 0;
-      animation: riseUp 1s forwards;
-    }
-
-    .blood-box:nth-child(odd) {
-      animation-delay: 0.2s;
-    }
-
-    .blood-box:nth-child(even) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes riseUp {
-      to {
-        transform: translateY(0);
-        opacity: 1;
+    @media (min-width: 650px) {
+      .main {
+        max-width: 400px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(50,50,50,0.08);
       }
-    }
-
-    .blood-icon {
-      font-size: 1.5em;
-      margin-bottom: 10px;
-    }
-
-    /* Unique colors */
-    .A_Positive { background-color: #ffe0e0; }
-    .A_Negative { background-color: #ffd6cc; }
-    .B_Positive { background-color: #fff0cc; }
-    .B_Negative { background-color: #ccffff; }
-    .AB_Positive { background-color: #e0ffcc; }
-    .AB_Negative { background-color: #f0ccff; }
-    .O_Positive { background-color: #ccccff; }
-    .O_Negative { background-color: #ffccee; }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 0.9em;
-      color: #888;
+      .marquee-box { width: 400px; left: 50%; transform: translateX(-50%) }
     }
   </style>
+  <script>
+    function goTo(page) {
+      window.location.href = page;
+    }
+  </script>
 </head>
 <body>
-  <header>
-<img src="BLCO-logo.png.jpg"
-     alt="Blood Connect Logo"
-     style="height: 250px; width: auto; float: left; margin: 10px 30px 0 10px; background-color: white; padding: 10px; border-radius: 2px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);" />
-    <div class="hero-text">BLOOD CONNECT | To Save Lives, Symbol of Dedication</div>
-    <div class="sub-hero">— A Compassionate Mission to Heal Humanity by SFRBC Students Wing, Tamilnadu.</div>
-  </header>
+  <div class="main">
+    <div class="logo-wrap">
+      <img src="BLCO-logo.png.jpg" alt="Blood Connect Logo" />
+    </div>
+    <h1>Blood Connect</h1>
+    <div class="subtitle">To Save Lives, Symbol of Dedication.<br>
+      <span style="font-size:0.97em">— SFRBC Students Wing, Tamilnadu.</span>
+    </div>
 
-  <!-- TIME: moved away from marquee -->
-  <div class="datetime" id="datetime"></div>
+    <div class="motivation">
+      “The gift of blood is the gift of life — Join us to make a difference today!”
+    </div>
 
-  <!-- MARQUEE: remains with original styling -->
-  <div class="marquee-container">
-    <div class="marquee">A INITIATIVE BY SFRBC STUDENTS WING TAMILNADU | New Donors Are Requested To Register First And Then Login </div>
+    <div class="features">
+      <div class="feature-box">
+        <div class="feature-icon">🩸</div>
+        Safe & Easy Donation
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">👥</div>
+        Connect with Local Donors
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">⏳</div>
+        Quick Emergency Help
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">❤️</div>
+        Save Precious Lives
+      </div>
+    </div>
+
+    <div class="marquee-box">
+      <span class="marquee-txt">
+        A INITIATIVE BY SFRBC STUDENTS WING TAMILNADU | New Donors Are Requested To Register First And Then Login
+      </span>
+    </div>
+
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="goTo('search.html')">🔍 Find Donor / Emergency Request</button>
+      <button class="nav-btn secondary" onclick="goTo('donor.html')">🩸 Register as Donor</button>
+      <button class="nav-btn secondary" onclick="goTo('donor-login.html')">🔑 Login</button>
+    </div>
   </div>
-
-  <nav>
-    <button onclick="location.href='donor-login.html'">Donor Login</button>
-    <button onclick="location.href='donor.html'">New Donor Registration</button>
-    <button onclick="location.href='search.html'">Emergency Blood Request</button>
-  </nav>
-
-  <div class="total-count" id="totalDonors">Loading eligible donors...</div>
-
-  <div class="blood-boxes" id="bloodBoxes">
-    <!-- Boxes will be inserted here dynamically -->
-  </div>
-
-  <footer>
+  <div class="footer">
     &copy; 2025 Blood Donors Connect | Powered by SFRBC Students Wing
-  </footer>
-
-  <!-- Firebase App -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB76hYryXBzyKQ5_hbsZLhx-l6Y46fbpAw",
-      authDomain: "blood-donors-connect.firebaseapp.com",
-      projectId: "blood-donors-connect",
-      storageBucket: "blood-donors-connect.appspot.com",
-      messagingSenderId: "813438848251",
-      appId: "1:813438848251:web:617a43ac27531922ddb45e"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
-    const classMap = {
-      "A+": "A_Positive", "A-": "A_Negative",
-      "B+": "B_Positive", "B-": "B_Negative",
-      "AB+": "AB_Positive", "AB-": "AB_Negative",
-      "O+": "O_Positive", "O-": "O_Negative"
-    };
-
-    const bloodBoxes = document.getElementById('bloodBoxes');
-    const totalDonors = document.getElementById('totalDonors');
-    let totalCount = 0;
-
-    bloodGroups.forEach(async (group) => {
-      const querySnapshot = await db.collection("donors")
-        .where("bloodGroup", "==", group)
-        .get();
-
-      let count = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const lastDonation = data.lastDonated ? new Date(data.lastDonated) : null;
-        if (!lastDonation || (new Date() - lastDonation) / (1000 * 60 * 60 * 24) >= 60) {
-          count++;
-        }
-      });
-
-      totalCount += count;
-      totalDonors.textContent = `Total Eligible Donors: ${totalCount}`;
-
-      const div = document.createElement("div");
-      div.className = `blood-box ${classMap[group]}`;
-      div.innerHTML = `
-        <div class="blood-icon">🩸</div>
-        <strong>${group}</strong><br>
-        ${count} Eligible
-      `;
-      div.onclick = () => {
-        window.location.href = `search.html?group=${encodeURIComponent(group)}`;
-      };
-      bloodBoxes.appendChild(div);
-    });
-
-    function updateDateTime() {
-      const now = new Date();
-      const options = { weekday: 'long' };
-      const dayName = now.toLocaleDateString('en-US', options);
-      const date = now.toLocaleDateString('en-GB');
-      const time = now.toLocaleTimeString();
-      document.getElementById("datetime").textContent =
-        `${date} (${dayName}) — ${time}`;
-    }
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
-  </script>
+  </div>
 </body>
 </html>
